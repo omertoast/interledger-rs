@@ -401,3 +401,68 @@ struct XpringResponse {
     username: String,
     payment_pointer: String,
 }
+
+#[derive(Debug, serde::Deserialize)]
+struct RipplexResponse {
+    #[serde(rename = "customSettings")]
+    custom_settings: CustomSettings,
+    #[serde(rename = "assetScale")]
+    asset_scale: u8,
+    #[serde(rename = "assetCode")]
+    asset_code: String,
+    #[serde(rename = "accountId")]
+    account_id: String,
+    #[serde(rename = "paymentPointer")]
+    payment_pointer: String
+}
+
+#[derive(Debug, serde::Deserialize)]
+struct CustomSettings {
+    #[serde(rename = "ilpOverHttp.outgoing.url")]
+    ilp_over_http_outgoing_url: String,
+    #[serde(rename = "ilpOverHttp.incoming.simple.auth_token")]
+    ilp_over_http_incoming_token: String,
+}
+
+#[test]
+fn deserialize_ripplex_response() {
+    let input = r#"
+        {
+        "accountId": "user_w0vzjgqc",   
+        "accountRelationship": "CHILD",
+        "assetCode": "XRP",
+        "assetScale": 9,
+        "maximumPacketAmount": null,
+        "linkType": {},
+        "connectionInitiator": true,
+        "isInternal": false,
+        "sendRoutes": true,
+        "receiveRoutes": false,
+        "balanceSettings": {
+            "minBalance": null,
+            "settleThreshold": null,
+            "settleTo": 0
+        },
+        "rateLimitSettings": {
+            "maxPacketsPerSecond": null
+        },
+        "settlementEngineDetails": null,
+        "customSettings": {
+            "ilpOverHttp.outgoing.url": "https://rxprod.wc.wallet.ripplex.io./ilp",
+            "ilpOverHttp.incoming.auth_type": "SIMPLE",
+            "ilpOverHttp.incoming.simple.auth_token": "ygV47wq8mvI0b",
+            "ilpOverHttp.outgoing.simple.auth_token": "enc:gcpkms:connector:secret0:1:gs:CiQAxw4QhykCtBPYDxd7n91yo3FGmiIGbDQE8bN1c6Ft_4tYvRUSWACjdIaO5ZBq-W9sN7OiSr3o9Hb8uQBv68QTmd61EMCXMHuEa6uxrJZNM2ZHwkvhMEPgBfTH13EGUGkeSQfLMVlp9ZXyluiP-m0t1OJbDfUAE4qv0LBIhRY=",
+            "ilpOverHttp.outgoing.auth_type": "SIMPLE"
+        },
+        "parentAccount": false,
+        "childAccount": true,
+        "peerAccount": false,
+        "peerOrParentAccount": false,
+        "paymentPointer": "$rxprod.wc.wallet.ripplex.io./user_w0vzjgqc"
+    }
+    "#;
+
+    let res_json: RipplexResponse = serde_json::from_str(input).unwrap();
+
+    assert_eq!("https://rxprod.wc.wallet.ripplex.io./ilp", res_json.custom_settings.ilp_over_http_outgoing_url);
+}
